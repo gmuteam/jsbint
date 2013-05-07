@@ -1,0 +1,29 @@
+{
+  "name": "jsbint",
+  "version": "0.0.1",
+  "description": "jslint for baidu gmu.",
+  "main": "src/lint/jsbint.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/liaoxuezhi/jsbint.git"
+  },
+  "keywords": [
+    "jslint",
+    "standard"
+  ],
+  "dependencies": {
+    "underscore": "1.4.x",
+    "glob" : "~3.1.21",
+    "commander": "~1.1.1"
+  },
+  "devDependencies": {
+    "nodeunit": "0.7.x"
+  },
+  "author": "gmu",
+  "license": "BSD",
+  "readmeFilename": "README.md",
+  "gitHead": "cf38863b345266e3507524c1684f22d391a66201"
+}
