@@ -289,6 +289,7 @@ var JSHINT = (function () {
 		return true;
 	}
 
+	// 模板解析{a}替换成成data.a
 	function supplant(str, data) {
 		return str.replace(/\{([^{}]*)\}/g, function (a, b) {
 			var r = data[b];
@@ -296,6 +297,7 @@ var JSHINT = (function () {
 		});
 	}
 
+	// 合并对象，如果key在blacklist黑名单中，则不复制
 	function combine(t, o) {
 		var n;
 		for (n in o) {
@@ -305,12 +307,14 @@ var JSHINT = (function () {
 		}
 	}
 
+	// 把blacklist黑名单中的key在predefined中对应的删除
 	function updatePredefined() {
 		Object.keys(JSHINT.blacklist).forEach(function (key) {
 			delete predefined[key];
 		});
 	}
 
+	// 添加必要的变量到predefined中
 	function assume() {
 		if (state.option.couch) {
 			combine(predefined, vars.couch);
@@ -374,6 +378,10 @@ var JSHINT = (function () {
 
 		if (state.option.yui) {
 			combine(predefined, vars.yui);
+		}
+
+		if (state.option.zepto) {
+			combine(predefined, vars.zepto);
 		}
 	}
 
@@ -519,6 +527,7 @@ var JSHINT = (function () {
 		}
 	}
 
+	// 用来解析jshint注释的。
 	function doOption() {
 		var nt = state.tokens.next;
 		var body = nt.body.split(",").map(function (s) { return s.trim(); });
@@ -590,7 +599,7 @@ var JSHINT = (function () {
 			"indent"
 		];
 
-		if (nt.type === "jshint" || nt.type === "jslint") {
+		if (nt.type === "jshint" || nt.type === "jslint" || nt.type === "jsbint") {
 			body.forEach(function (g) {
 				g = g.split(":");
 				var key = (g[0] || "").trim();
@@ -701,6 +710,7 @@ var JSHINT = (function () {
 	// from
 	//	   for ( var i = ...
 
+	// 用来向前查找的。看看下n个token是啥？
 	function peek(p) {
 		var i = p || 0, j = 0, t;
 
@@ -716,6 +726,9 @@ var JSHINT = (function () {
 
 	// Produce the next token. It looks for programming errors.
 
+	// 如果指定了id, 断言下一个字符，如果不是，则会报错，这里附带些语法检测
+	// 移动token到下一个
+	// 前进的意思
 	function advance(id, t) {
 		switch (state.tokens.curr.id) {
 		case "(number)":
@@ -789,6 +802,7 @@ var JSHINT = (function () {
 
 	// They are elements of the parsing method called Top Down Operator Precedence.
 
+	// 表达式
 	function expression(rbp, initial) {
 		var left, isArray = false, isObject = false;
 
@@ -856,6 +870,7 @@ var JSHINT = (function () {
 
 // Functions for conformance of style.
 
+	// 同行的情况，当前left和right中不允许有空白
 	function adjacent(left, right) {
 		left = left || state.tokens.curr;
 		right = right || state.tokens.next;
@@ -867,6 +882,7 @@ var JSHINT = (function () {
 		}
 	}
 
+	// left与right中间不能有任何东西
 	function nobreak(left, right) {
 		left = left || state.tokens.curr;
 		right = right || state.tokens.next;
@@ -940,6 +956,7 @@ var JSHINT = (function () {
 	}
 
 
+	// 逗号
 	function comma(opts) {
 		opts = opts || {};
 
@@ -1025,6 +1042,7 @@ var JSHINT = (function () {
 		return x;
 	}
 
+	// 分隔符
 	function delim(s) {
 		return symbol(s, 0);
 	}
@@ -3445,7 +3463,6 @@ var JSHINT = (function () {
 				statements();
 			}
 			advance((state.tokens.next && state.tokens.next.value !== ".")	? "(end)" : undefined);
-
 			var markDefined = function (name, context) {
 				do {
 					if (typeof context[name] === "string") {
@@ -3707,6 +3724,19 @@ var JSHINT = (function () {
 	};
 
 	itself.jshint = itself;
+
+	function debug( exit ){
+        var args = [].slice.call(arguments, 0);
+
+        exit = args.pop();
+        if(typeof exit !== 'boolean') {
+            args.push(exit);
+            exit = false;
+        }
+
+        console.log.apply(console, args);
+        exit && process.exit(1);
+    }
 
 	return itself;
 }());

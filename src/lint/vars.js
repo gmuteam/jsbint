@@ -393,3 +393,7 @@ exports.yui = {
 	YUI_config: false
 };
 
+exports.zepto = {
+	"$" 	: false,
+	"Zepto" : false
+}

@@ -430,7 +430,7 @@ Lexer.prototype = {
 		// comments.
 
 		function commentToken(label, body, opt) {
-			var special = ["jshint", "jslint", "members", "member", "globals", "global", "exported"];
+			var special = ["jsbint", "jshint", "jslint", "members", "member", "globals", "global", "exported"];
 			var isSpecial = false;
 			var value = label + body;
 			var commentType = "plain";
