@@ -183,6 +183,10 @@ var warnings = {
 	W115: "Octal literals are not allowed in strict mode.",
 	W116: "Expected '{a}' and instead saw '{b}'.",
 	W117: "'{a}' is not defined.",
+
+	// jsbint新加入的
+	W500: "赋初始值的变量申明应该放在不赋初始值变量前面。",
+	W501: "每个变量申明应该独占一行。",
 };
 
 var info = {

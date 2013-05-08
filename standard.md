@@ -89,7 +89,7 @@ function a() {
 }
 ```
 
-同时每个变量独占一行，第二个起应当有两个缩进。需要赋值初始值的优先放在前面，如：
+同时每个变量独占一行，第二个起应当在var所需缩进的基础上多一个缩进。需要赋值初始值的优先放在前面，如：
 
 ```javascript
 function a() {
@@ -107,26 +107,35 @@ function a() {
 
 单行语句不允许超出80个字符，超出的需要进行合适的断行处理。
 
-1-5-1. 函数链式调用，从第二个点的前面开始换行，且换行后前面应当有一个缩进。
+1-5-1. 函数链式调用，如果一行太长，链式方法应当在点之前合适的断行，且新行应当在链式开始行所需缩进的基础上多两个缩进, 且一旦断行后后面的每个方法都需要独占一行。如果某个方法的参数中带有匿名方法，则这个方法的调用之前应当换行。
 
 ```javascript
-//函数链式调用
+// 函数链式调用
 var $item = $( '<div></div>' ).attr( 'id', 'test' )
-    .attr( 'id', 'what ever' )
-    .addClass( 'className' )
-    .html( 'xxxx' );
+        .attr( 'id', 'what ever' )
+        .addClass( 'className' )
+        .html( 'xxxx' );
 
-//非赋值语句
+// 非赋值语句
 $( '<div></div>' ).attr( 'id', 'test' )
-    .attr( 'id', 'what ever' )
-    .addClass( 'className' )
-    .html( 'xxxx' );
+        .attr( 'id', 'what ever' )
+        .addClass( 'className' )
+        .html( 'xxxx' );
 
-//先取对象再取方法
-obj.obj1
-    .obj3
-    .funA()
-    .funB();
+// 如果某个方法的参数中带有匿名方法，则这个方法的调用之前应当换行。
+var $item = $( '<div></div>' )
+        .attr( 'id', function() {
+            doSomething();
+        } ).addClass('className')
+        .html( 'xxxx' );
+
+// 错误的示例
+$( '<div></div>' ).attr( 'id', function() {
+            doSomething();
+        } )
+        .attr( 'id', 'what ever' )
+        .addClass( 'className' )
+        .html( 'xxxx' );
 ```
 
 1-5-2. 方法参数过长，if语句中条件过多时也需要换行，这种情况下的缩进为2个。同是操作符应当保留在右边结尾处。

@@ -141,8 +141,16 @@ var JSHINT = (function () {
 			// Obsolete options
 			onecase     : true, // if one case switch statements should be allowed
 			regexp      : true, // if the . should not be allowed in regexp literals
-			regexdash   : true  // if unescaped first/last dash (-) inside brackets
+			regexdash   : true, // if unescaped first/last dash (-) inside brackets
 			                    // should be tolerated
+
+			// 新加的
+
+			// 赋值的变量应该放在前面
+			assignvarfirst : false,
+
+			//每个变量申明独占一行
+			varnewline : false
 		},
 
 		// These are the JSHint options that can take any value
@@ -877,6 +885,7 @@ var JSHINT = (function () {
 		}
 	}
 
+	// left后面需要有空格
 	function nonadjacent(left, right) {
 		if (state.option.white) {
 			left = left || state.tokens.curr;
@@ -2630,11 +2639,27 @@ var JSHINT = (function () {
 				}
 				value = expression(0);
 				name.first = value;
+				
+				// 非赋值的变量跑到赋初始值的变量前面了。
+				if( state.option.assignvarfirst && funct["(unassignvar)"] ) {
+					warning("W500");
+				}
+
+			} else if( state.option.assignvarfirst ) {
+				
+				// 说明是非赋值语句
+				funct["(unassignvar)"] = true;
+
 			}
 			if (state.tokens.next.id !== ",") {
 				break;
 			}
 			comma();
+
+			// 如果设置了
+			if( state.option.varnewline && state.tokens.prev.line === state.tokens.next.line) {
+				warning("W501");
+			}
 		}
 		return this;
 	});

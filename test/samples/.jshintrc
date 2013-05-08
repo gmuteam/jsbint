@@ -83,5 +83,9 @@
     "white"         : false,    // true: Check against strict whitespace and indentation rules
 
     // Custom Globals
-    "predef"        : [ ]       // additional predefined global variables
+    "predef"        : [ ],       // additional predefined global variables
+
+    // new options in jsbint
+    "assignvarfirst" : true,  // 赋值的变量应该放在非赋值的前面
+    "varnewline": true // 变量申明，要求每个变量独占一行
 }
