@@ -91,6 +91,7 @@ var JSHINT = (function () {
 			immed       : true, // if immediate invocations must be wrapped in parens
 			iterator    : true, // if the `__iterator__` property should be allowed
 			jquery      : true, // if jQuery globals should be predefined
+			zepto       : true, // if jQuery globals should be predefined
 			lastsemic   : true, // if semicolons may be ommitted for the trailing
 			                    // statements inside of a one-line blocks.
 			latedef     : true, // if the use before definition should not be tolerated
@@ -150,7 +151,10 @@ var JSHINT = (function () {
 			assignvarfirst : false,
 
 			//每个变量申明独占一行
-			varnewline : false
+			varnewline : false,
+
+			// 严格的链式调用格式
+			strictchain: false
 		},
 
 		// These are the JSHint options that can take any value
@@ -824,7 +828,6 @@ var JSHINT = (function () {
 			} else {
 				error("E030", state.tokens.curr, state.tokens.curr.id);
 			}
-
 			while (rbp < state.tokens.next.lbp) {
 				isArray = state.tokens.curr.value === "Array";
 				isObject = state.tokens.curr.value === "Object";
@@ -930,6 +933,15 @@ var JSHINT = (function () {
 				left.from += (left.character - left.from);
 				warning("W013", left, left.value);
 			}
+		}
+	}
+
+	function linebreak(left, right, message){
+		left = left || state.tokens.curr;
+		right = right || state.tokens.next;
+
+		if (left.line === right.line) {
+			warning("W086", right.curr, message || right.id);
 		}
 	}
 
@@ -1208,7 +1220,6 @@ var JSHINT = (function () {
 				if (state.option.esnext && funct[left.value] === "const") {
 					error("E013", left, left.value);
 				}
-
 				if (left.id === "." || left.id === "[") {
 					if (!left.left || left.left.value === "arguments") {
 						warning("E031", that);
@@ -1509,7 +1520,6 @@ var JSHINT = (function () {
 				} else if (p.id !== ";") {
 					break;
 				}
-
 				indentation();
 				advance();
 				if (state.directive[state.tokens.curr.value]) {
@@ -2039,7 +2049,14 @@ var JSHINT = (function () {
 	infix(".", function (left, that) {
 		adjacent(state.tokens.prev, state.tokens.curr);
 		nobreak();
-		var m = identifier(false, true);
+
+		var _pre = state.tokens.prev,
+			m = identifier(false, true),
+			i = 0,
+			_depth = 0,
+			prev,
+			chainbreak,
+			t;
 
 		if (typeof m === "string") {
 			countMember(m);
@@ -2064,6 +2081,54 @@ var JSHINT = (function () {
 
 		if (!state.option.evil && (m === "eval" || m === "execScript")) {
 			warning("W061");
+		}
+
+		if( state.option.strictchain ) {
+			prev = left;
+
+			// 查找前面的链式是否已经断行
+			while( prev ) {
+				if( prev.value === "."  && prev["(chainbreak)"]) {
+					chainbreak = true;
+					break;
+				}
+
+				prev = prev.left;
+			}
+
+			if( !chainbreak && state.tokens.next.id === "(" ) {
+
+				// 查看此次调用中是否有block
+				while( true ) {
+					t = peek(i);
+
+					if( t.id === ')' ) {
+						if( _depth ) {
+							_depth--;
+						} else {
+							break;
+						}
+					} else if( t.id === '(' ) {
+						_depth++;
+					}
+
+
+					if( t.line !== state.tokens.next.line) {
+						chainbreak = true;
+						break;
+					}
+
+					i++;
+				}
+
+			}
+
+			if( chainbreak ) {
+				state.tokens.prev["(chainbreak)"] = true;
+				linebreak(_pre, state.tokens.prev, "."+m);
+
+			}
+
 		}
 
 		return that;
@@ -2143,6 +2208,12 @@ var JSHINT = (function () {
 					left.id !== "?") {
 				warning("W067", left);
 			}
+		}
+
+		// 检查链式缩进
+		if( state.option.strictchain && state.tokens.next.id === "." && 
+				state.tokens.next.line !== state.tokens.curr.line ) {
+			indentation( 2 * state.option.indent );
 		}
 
 		that.left = left;
@@ -3459,7 +3530,6 @@ var JSHINT = (function () {
 						warning("W097", state.tokens.prev);
 					}
 				}
-
 				statements();
 			}
 			advance((state.tokens.next && state.tokens.next.value !== ".")	? "(end)" : undefined);
@@ -3733,6 +3803,9 @@ var JSHINT = (function () {
             args.push(exit);
             exit = false;
         }
+
+        args.unshift('\nstart\n---------------------------------\n');
+        args.push('\n----------------------------------\nend');
 
         console.log.apply(console, args);
         exit && process.exit(1);
