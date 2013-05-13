@@ -33,7 +33,6 @@
                 {line:23, character:12},
                 {line:23, character:14},
                 {line:23, character:15},
-                {line:23, character:19},
                 {line:23, character:20},
                 {line:23, character:23},
                 {line:23, character:24},

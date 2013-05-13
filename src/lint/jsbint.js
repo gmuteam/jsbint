@@ -3301,7 +3301,6 @@ var JSHINT = (function () {
 				parseCondAssignment();
 			}
 			nolinebreak(state.tokens.curr);
-			nonadjacent();
 			advance(";");
 			nonadjacent();
 			if (state.tokens.next.id === ";") {
