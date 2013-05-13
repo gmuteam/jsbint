@@ -6,23 +6,24 @@
         debug = require('../util/helper').debug;
 
 
-    // 测试链式函数断行问题。
-    exports.testChain = function( test ){
-        var result = jsbint('chain.js'),
+    // 测试双倍缩进
+    exports.testDoubleIndent = function( test ){
+        var result = jsbint('doubleindent.js'),
             errorPos = [
-                {line:18, character:16},
-                {line:33, character:23},
-                {line:42, character:9},
-                {line:43, character:9},
-                {line:44, character:9}
+                {line:5, character:9},
+                {line:8, character:13},
+                {line:12, character:9},
+                {line:15, character:9},
+                {line:20, character:9},
+                {line:25, character:5}
             ];
 
         // debug(result, true);
 
         result = result.filter(function( error ) {
-            return ~['W015', 'W086', "W014"].indexOf( error.code );
+            return ~['W015'].indexOf( error.code );
         });
-        
+
         // debug(result, true);
 
         test.expect(errorPos.length*2+1);

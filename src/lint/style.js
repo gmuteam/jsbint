@@ -1,6 +1,69 @@
 "use strict";
 
 exports.register = function (linter) {
+	var state =  require("./state.js").state,
+		hasFileComment = false;
+
+
+	linter.on("start", function(){
+		hasFileComment = false;
+	});
+
+	linter.on("Comment", function(data){
+		if( data.isMultiline) {
+			if(/@(fileoverview|file)/i.test(data.value)) {
+				hasFileComment = true;
+			}
+		}
+	});
+
+	linter.on("complete", function(){
+		if(linter.getOption("fileoverview") && !hasFileComment ) {
+			linter.warn("W508", {
+				line: 0,
+				char: 0
+			});
+		}
+	});
+
+
+	linter.on("Comment", function style_scanComment( data ) {
+		var curr = state.tokens.curr;
+
+		if (!linter.getOption("strictcomment")) {
+			return;
+		}
+		
+		// 单行注释
+		if( !data.isMultiline ) {
+			if( data.body.substr(0, 1) !== ' ' ) {
+				linter.warn("W013", {
+					line: data.line,
+					char: data.from + 2,
+					data: [ '//' ]
+				});
+			}
+
+			if( curr.line === data.line && 
+				data.from !==  curr.character + linter.getOption("indent")) {
+
+				linter.warn("W015", {
+					line: data.line,
+					char: data.from,
+					data: [data.value, curr.character + linter.getOption("indent"), data.from ]
+				});
+			}
+		} else {
+			data.line -= data.value.match(/\n/g).length;
+		}
+		if( data.line - curr.line === 1 ) {
+			linter.warn("W503", {
+				line: data.line,
+				char: data.from,
+				data: [data.value.split(/\n/)[0]]
+			});
+		}
+	});
 	// Check for properties named __proto__. This special property was
 	// deprecated and then re-introduced for ES6.
 

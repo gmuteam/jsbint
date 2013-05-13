@@ -1623,6 +1623,17 @@ Lexer.prototype = {
 			case Token.Comment:
 				state.tokens.curr.comment = true;
 
+				this.trigger("Comment", {
+					line: this.line,
+					char: this.char,
+					from: this.from,
+					value: token.value,
+					base: token.base,
+					body: token.body,
+					isMalformed: token.malformed,
+					isMultiline: token.isMultiline
+				});
+
 				if (token.isSpecial) {
 					return {
 						value: token.value,

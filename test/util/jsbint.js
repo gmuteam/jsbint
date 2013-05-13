@@ -19,6 +19,9 @@
         // Remove potential Unicode BOM.
         content = content.replace(/^\uFEFF/, "");
 
+
+        opts.maxerr = 1000000;
+
         if ( !jsbint(content, opts, globals) ) {
 
             jsbint.errors.forEach(function (err) {

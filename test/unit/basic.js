@@ -116,4 +116,41 @@
 
         test.done();
     };
+
+    // 测试字符连接
+    exports.testString = function( test ){
+        var result = jsbint('longstring.js'),
+            errorPos = [
+                {line:10, character:74},
+                {line:11, character:70},
+                {line:12, character:74},
+                {line:13, character:68},
+                {line:14, character:75}
+            ];
+
+        // debug(result, true);
+        
+        result = result.filter(function( error ) {
+            return ~['W043'].indexOf( error.code );
+        });
+
+        // debug(result, true);
+
+        /*result.forEach(function(error){
+            console.log("{line:"+error.line+", character:"+error.character+"},");
+        });
+        debug(true);*/
+
+        test.expect(errorPos.length*2+1);
+
+        test.equal(result.length, errorPos.length, 'ok');
+
+        result.forEach(function( error, index ) {
+            var expected = errorPos[index];
+            test.equal(expected.line, error.line, 'ok');
+            test.equal(expected.character, error.character, 'ok');
+        });
+
+        test.done();
+    }
 })();

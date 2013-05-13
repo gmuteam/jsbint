@@ -86,7 +86,6 @@ var JSHINT = (function () {
 			expr        : true, // if ExpressionStatement should be allowed as Programs
 			forin       : true, // if for in statements must filter
 			funcscope   : true, // if only function scope should be used for scope tests
-			gcl         : true, // if JSHint should be compatible with Google Closure Linter
 			globalstrict: true, // if global "use strict"; should be allowed (also enables 'strict')
 			immed       : true, // if immediate invocations must be wrapped in parens
 			iterator    : true, // if the `__iterator__` property should be allowed
@@ -154,7 +153,21 @@ var JSHINT = (function () {
 			varnewline : false,
 
 			// 严格的链式调用格式
-			strictchain: false
+			strictchain: false,
+
+			// 严格的缩进
+			strictindent: false,
+
+			// 断行的时候，操作符应该保留在右边
+			operatorend: false,
+
+			// 每个区块开始都要有个空行，每个注释前面需要空行
+			// else 后面不允许另起新行
+			strictlinebreak: false,
+
+			strictcomment: false,	// 严格的注释
+			novoid: false,	// 严格的注释
+			fileoverview: false	// 文件注释说明
 		},
 
 		// These are the JSHint options that can take any value
@@ -170,11 +183,20 @@ var JSHINT = (function () {
 			maxdepth     : false, // {int} max nested block depth per function
 			maxparams    : false, // {int} max params per function
 			maxcomplexity: false, // {int} max cyclomatic complexity per function
-			unused       : true  // warn if variables are unused. Available options:
+			unused       : true, // warn if variables are unused. Available options:
 			                     //   false    - don't check for unused variables
 			                     //   true     - "vars" + check last function param
 			                     //   "vars"   - skip checking unused function params
 			                     //   "strict" - "vars" + check all function params
+
+			// 统一将this赋值给指定变量名
+			assignthisto: false,
+
+			// 统一将exception赋值给指定变量名
+			assignexceptionto: false,
+
+			// 尝试检测，变量值为zepto/jquery对象的变量名字以$开头
+			dollarstyle: false
 		},
 
 		// These are JSHint boolean options which are shared with JSLint
@@ -770,9 +792,9 @@ var JSHINT = (function () {
 
 		state.tokens.prev = state.tokens.curr;
 		state.tokens.curr = state.tokens.next;
+		
 		for (;;) {
 			state.tokens.next = lookahead.shift() || lex.token();
-
 			if (!state.tokens.next) { // No more tokens left, give up
 				quit("E041", state.tokens.curr.line);
 			}
@@ -786,6 +808,22 @@ var JSHINT = (function () {
 			} else {
 				if (state.tokens.next.id !== "(endline)") {
 					break;
+				}
+			}
+		}
+
+		// 严格的缩进检测
+		// todo 缩进后，进入()里面再换行应该再次加2个缩进
+		if( state.option.strictindent && state.tokens.next.line !== state.tokens.curr.line ) {
+			if( state.tokens.curr.relation || state.tokens.next.relation ||
+				~["&&", "||"].indexOf(state.tokens.curr.id) || 
+				~["&&", "||"].indexOf(state.tokens.next.id)
+			 ) {
+				indentation( 2 * state.option.indent );
+
+				if( state.option.operatorend && state.tokens.next.relation ||
+					~["&&", "||"].indexOf(state.tokens.next.id) ) {
+					warning('W502', state.tokens.curr, state.tokens.next.id);
 				}
 			}
 		}
@@ -873,7 +911,7 @@ var JSHINT = (function () {
 
 // Functions for conformance of style.
 
-	// 同行的情况，当前left和right中不允许有空白
+	// 同行的情况，left和right在同一行的情况下不允许有任何东西
 	function adjacent(left, right) {
 		left = left || state.tokens.curr;
 		right = right || state.tokens.next;
@@ -885,7 +923,7 @@ var JSHINT = (function () {
 		}
 	}
 
-	// left与right中间不能有任何东西
+	// left与right中间不能有任何东西，包括换行
 	function nobreak(left, right) {
 		left = left || state.tokens.curr;
 		right = right || state.tokens.next;
@@ -894,6 +932,7 @@ var JSHINT = (function () {
 		}
 	}
 
+	// 没有空白字符
 	function nospace(left, right) {
 		left = left || state.tokens.curr;
 		right = right || state.tokens.next;
@@ -904,7 +943,7 @@ var JSHINT = (function () {
 		}
 	}
 
-	// left后面需要有空格
+	// left和right在同行的条件下，必须有空白
 	function nonadjacent(left, right) {
 		if (state.option.white) {
 			left = left || state.tokens.curr;
@@ -927,8 +966,7 @@ var JSHINT = (function () {
 		if (!state.option.laxbreak && left.line !== right.line) {
 			warning("W014", right, right.id);
 		} else if (state.option.white) {
-			left = left || state.tokens.curr;
-			right = right || state.tokens.next;
+			
 			if (left.character === right.from) {
 				left.from += (left.character - left.from);
 				warning("W013", left, left.value);
@@ -937,11 +975,23 @@ var JSHINT = (function () {
 	}
 
 	function linebreak(left, right, message){
-		left = left || state.tokens.curr;
-		right = right || state.tokens.next;
+		if( state.option.strictlinebreak ) {
+			left = left || state.tokens.curr;
+			right = right || state.tokens.next;
+			if (left.line === right.line) {
+				warning("W086", right, message || right.value);
+			}
+		}
+	}
 
-		if (left.line === right.line) {
-			warning("W086", right.curr, message || right.id);
+	function blankline( left, right, message ) {
+		if( state.option.strictlinebreak ) {
+			left = left || state.tokens.curr;
+			right = right || state.tokens.next;
+
+			if( right.line - left.line < 2 ) {
+				warning('W503', right, message || right.value);
+			}
 		}
 	}
 
@@ -963,7 +1013,7 @@ var JSHINT = (function () {
 	function nolinebreak(t) {
 		t = t || state.tokens.curr;
 		if (t.line !== state.tokens.next.line) {
-			warning("E022", t, t.value);
+			warning("W014", t, state.tokens.next.value);
 		}
 	}
 
@@ -1069,6 +1119,14 @@ var JSHINT = (function () {
 	function blockstmt(s, f) {
 		var x = stmt(s, f);
 		x.block = true;
+		x.fud = function(){
+
+			// 处理ele if中的if情况，这个时候是不要求换行的
+			if( !state.tokens.prev.reserved ) {
+				blankline(state.tokens.prev, state.tokens.curr);
+			}
+			return typeof f === "function" ? f.call(this): this;
+		}
 		return x;
 	}
 
@@ -1190,6 +1248,7 @@ var JSHINT = (function () {
 			this.right = right;
 			return this;
 		};
+		x.relation = true;
 		return x;
 	}
 
@@ -1207,6 +1266,8 @@ var JSHINT = (function () {
 		symbol(s, 20).exps = true;
 
 		return infix(s, function (left, that) {
+			var rightvalue;
+
 			that.left = left;
 
 			if (predefined[left.value] === false &&
@@ -1220,6 +1281,7 @@ var JSHINT = (function () {
 				if (state.option.esnext && funct[left.value] === "const") {
 					error("E013", left, left.value);
 				}
+
 				if (left.id === "." || left.id === "[") {
 					if (!left.left || left.left.value === "arguments") {
 						warning("E031", that);
@@ -1231,6 +1293,25 @@ var JSHINT = (function () {
 						warning("W022", left);
 					}
 					that.right = expression(19);
+
+					rightvalue = that.right;
+
+					while( rightvalue.value === '=' ) {
+						rightvalue = rightvalue.right;
+					}
+					
+					if( isString( state.option.assignthisto ) && 
+							rightvalue.value === 'this' && 
+							left.value !== state.option.assignthisto ) {
+
+						warning("W505", left, state.option.assignthisto, left.value );
+					}
+
+					// todo
+					/*if( state.option.dollarstyle &&
+							rightvalue.value.match(/^(\$|jQuery|Zepto)/) && !left.value.match(/^\$/) )
+						warning("W506", left, left.value );*/
+
 					return that;
 				}
 
@@ -1576,9 +1657,15 @@ var JSHINT = (function () {
 		metrics.verifyMaxNestedBlockDepthPerFunction();
 
 		if (state.tokens.next.id === "{") {
+			nolinebreak();
+
 			advance("{");
+
 			line = state.tokens.curr.line;
 			if (state.tokens.next.id !== "}") {
+				
+				// 必须断行
+				linebreak();
 				indent += state.option.indent;
 				while (!ordinary && state.tokens.next.from > indent) {
 					indent += state.option.indent;
@@ -1635,7 +1722,7 @@ var JSHINT = (function () {
 		if (!ordinary || !state.option.funcscope) scope = s;
 		inblock = b;
 		if (ordinary && state.option.noempty && (!a || a.length === 0)) {
-			warning("W035");
+			warning("W035", state.tokens.curr);
 		}
 		metrics.nestedBlockDepth -= 1;
 		return a;
@@ -2044,7 +2131,22 @@ var JSHINT = (function () {
 	});
 	state.syntax["new"].exps = true;
 
-	prefix("void").exps = true;
+	prefix("void", function () {
+		this.right = expression(150);
+		this.arity = "unary";
+		if (this.id === "++" || this.id === "--") {
+			if (state.option.plusplus) {
+				warning("W016", this, this.id);
+			} else if ((!this.right.identifier || isReserved(this.right)) &&
+					this.right.id !== "." && this.right.id !== "[") {
+				warning("W017", this);
+			}
+		}
+		if( state.option.novoid ) {
+			warning("W509", this);
+		}
+		return this;
+	}).exps = true;
 
 	infix(".", function (left, that) {
 		adjacent(state.tokens.prev, state.tokens.curr);
@@ -2112,8 +2214,8 @@ var JSHINT = (function () {
 						_depth++;
 					}
 
-
-					if( t.line !== state.tokens.next.line) {
+					// 根据做括号来判断是否有block
+					if( t.id === '{' ) {
 						chainbreak = true;
 						break;
 					}
@@ -2126,7 +2228,6 @@ var JSHINT = (function () {
 			if( chainbreak ) {
 				state.tokens.prev["(chainbreak)"] = true;
 				linebreak(_pre, state.tokens.prev, "."+m);
-
 			}
 
 		}
@@ -2139,13 +2240,13 @@ var JSHINT = (function () {
 			nobreak(state.tokens.prev, state.tokens.curr);
 		}
 
-		nospace();
 		if (state.option.immed && !left.immed && left.id === "function") {
 			warning("W062");
 		}
 
 		var n = 0;
 		var p = [];
+		var t1, t2;
 
 		if (left) {
 			if (left.type === "(identifier)") {
@@ -2162,19 +2263,45 @@ var JSHINT = (function () {
 		}
 
 		if (state.tokens.next.id !== ")") {
+			t1 = state.tokens.curr;
+			t2 = state.tokens.next;
+
 			for (;;) {
 				p[p.length] = expression(10);
 				n += 1;
 				if (state.tokens.next.id !== ",") {
 					break;
 				}
+
+				if( state.option.operatorend && 
+					state.tokens.next.line !== state.tokens.curr.line ) {
+					warning('W502', state.tokens.curr, state.tokens.next.id);
+				}
+
 				comma();
+
+				if( state.option.strictindent && 
+					state.tokens.next.line !== state.tokens.curr.line ) {
+
+					indentation( 2 * state.option.indent );
+				}
+				//
 			}
+
+			// 如果
+			if( p.length === 1 && ~["[", "function", "{"].indexOf( p[0].id )) {
+				nospace(t1, t2);
+				advance(")");
+				nospace(state.tokens.prev, state.tokens.curr);
+			} else {
+				nonadjacent(t1, t2);
+				advance(")");
+				nonadjacent(state.tokens.prev, state.tokens.curr);
+			}
+		} else {
+			advance(")");
+			nospace(state.tokens.prev, state.tokens.curr);
 		}
-
-		advance(")");
-		nospace(state.tokens.prev, state.tokens.curr);
-
 		if (typeof left === "object") {
 			if (left.value === "parseInt" && n === 1) {
 				warning("W065", state.tokens.curr);
@@ -2211,7 +2338,7 @@ var JSHINT = (function () {
 		}
 
 		// 检查链式缩进
-		if( state.option.strictchain && state.tokens.next.id === "." && 
+		if( state.option.strictindent && state.tokens.next.id === "." && 
 				state.tokens.next.line !== state.tokens.curr.line ) {
 			indentation( 2 * state.option.indent );
 		}
@@ -2253,7 +2380,7 @@ var JSHINT = (function () {
 
 	infix("[", function (left, that) {
 		nobreak(state.tokens.prev, state.tokens.curr);
-		nospace();
+		nonadjacent();
 		var e = expression(0), s;
 		if (e && e.type === "(string)") {
 			if (!state.option.evil && (e.value === "eval" || e.value === "execScript")) {
@@ -2274,7 +2401,7 @@ var JSHINT = (function () {
 			warning("W001");
 		}
 
-		nospace(state.tokens.prev, state.tokens.curr);
+		nonadjacent(state.tokens.prev, state.tokens.curr);
 		that.left = left;
 		that.right = e;
 		return that;
@@ -2282,13 +2409,19 @@ var JSHINT = (function () {
 
 	prefix("[", function () {
 		var b = state.tokens.curr.line !== state.tokens.next.line;
+		var t1, t2;
 		this.first = [];
+
 		if (b) {
 			indent += state.option.indent;
 			if (state.tokens.next.from === indent + state.option.indent) {
 				indent += state.option.indent;
 			}
 		}
+
+		t1 = state.tokens.curr;
+		t2 = state.tokens.next;
+
 		while (state.tokens.next.id !== "(end)") {
 			while (state.tokens.next.id === ",") {
 				if (!state.option.es5)
@@ -2312,10 +2445,19 @@ var JSHINT = (function () {
 				break;
 			}
 		}
+
 		if (b) {
 			indent -= state.option.indent;
 			indentation();
 		}
+
+		if( this.first.length ) {
+			nonadjacent( t1, t2 );
+			nonadjacent();
+		} else {
+			nospace();
+		}
+		
 		advance("]", this);
 		return this;
 	}, 160);
@@ -2348,22 +2490,35 @@ var JSHINT = (function () {
 		var ident;
 
 		advance("(");
-		nospace();
 
 		if (state.tokens.next.id === ")") {
+			nospace();
 			advance(")");
 			return;
 		}
+
+		nonadjacent();
 
 		for (;;) {
 			ident = identifier(true);
 			params.push(ident);
 			addlabel(ident, "unused", state.tokens.curr);
 			if (state.tokens.next.id === ",") {
+				if( state.option.operatorend && 
+					state.tokens.next.line !== state.tokens.curr.line ) {
+					warning('W502', state.tokens.curr, state.tokens.next.id);
+				}
+
 				comma();
+
+				if( state.option.strictindent && 
+					state.tokens.next.line !== state.tokens.curr.line ) {
+
+					indentation( 2 * state.option.indent );
+				}
 			} else {
 				advance(")", next);
-				nospace(state.tokens.prev, state.tokens.curr);
+				nonadjacent(state.tokens.prev, state.tokens.curr);
 				return params;
 			}
 		}
@@ -2775,14 +2930,17 @@ var JSHINT = (function () {
 
 	prefix("function", function () {
 		var i = optionalidentifier();
-		if (i || state.option.gcl) {
-			adjacent(state.tokens.curr, state.tokens.next);
-		} else {
+		if ( i ) {
 			nonadjacent(state.tokens.curr, state.tokens.next);
+		} else {
+			adjacent(state.tokens.curr, state.tokens.next);
 		}
 		doFunction(i);
 		if (!state.option.loopfunc && funct["(loopage)"]) {
 			warning("W083");
+		}
+		if (state.tokens.next.id === "(" && state.tokens.next.line === state.tokens.curr.line) {
+			error("E039");
 		}
 		return this;
 	});
@@ -2792,15 +2950,26 @@ var JSHINT = (function () {
 		increaseComplexityCount();
 		advance("(");
 		nonadjacent(this, t);
-		nospace();
+		//nospace();
+
+		// 必须有空格
+		nonadjacent();
 		expression(20);
 		parseCondAssignment();
 		advance(")", t);
-		nospace(state.tokens.prev, state.tokens.curr);
+		//nospace(state.tokens.prev, state.tokens.curr);
+
+		// 必须有空格
+		nonadjacent(state.tokens.prev, state.tokens.curr);
 		block(true, true);
 		if (state.tokens.next.id === "else") {
 			nonadjacent(state.tokens.curr, state.tokens.next);
 			advance("else");
+
+			if( state.option.strictlinebreak && state.tokens.prev.line !== state.tokens.next.line ) {
+				warning("W504", state.tokens.curr, state.tokens.curr.id);
+			}
+
 			if (state.tokens.next.id === "if" || state.tokens.next.id === "switch") {
 				statement(true);
 			} else {
@@ -2817,9 +2986,14 @@ var JSHINT = (function () {
 			var oldScope = scope;
 			var e;
 
+			nonadjacent();
 			advance("catch");
+			if( state.option.strictlinebreak && state.tokens.prev.line !== state.tokens.next.line ) {
+				warning("W504", state.tokens.curr, state.tokens.curr.id);
+			}
 			nonadjacent(state.tokens.curr, state.tokens.next);
 			advance("(");
+			nonadjacent();
 
 			scope = Object.create(oldScope);
 
@@ -2829,7 +3003,12 @@ var JSHINT = (function () {
 				warning("E030", state.tokens.next, e);
 			}
 
+			if( isString(state.option.assignexceptionto) && e!== state.option.assignexceptionto ) {
+				warning("W506", state.tokens.next, state.option.assignexceptionto, e);
+			}
+
 			advance();
+			nonadjacent();
 			advance(")");
 
 			funct = {
@@ -2888,11 +3067,13 @@ var JSHINT = (function () {
 		increaseComplexityCount();
 		advance("(");
 		nonadjacent(this, t);
-		nospace();
+		//nospace();
+		nonadjacent();
 		expression(20);
 		parseCondAssignment();
 		advance(")", t);
-		nospace(state.tokens.prev, state.tokens.curr);
+		//nospace(state.tokens.prev, state.tokens.curr);
+		nonadjacent(state.tokens.prev, state.tokens.curr);
 		block(true, true);
 		funct["(breakage)"] -= 1;
 		funct["(loopage)"] -= 1;
@@ -2908,11 +3089,11 @@ var JSHINT = (function () {
 		}
 
 		advance("(");
-		nonadjacent(this, t);
-		nospace();
+		nospace(this, t);
+		nonadjacent();
 		expression(0);
 		advance(")", t);
-		nospace(state.tokens.prev, state.tokens.curr);
+		nonadjacent(state.tokens.prev, state.tokens.curr);
 		block(true, true);
 
 		return this;
@@ -2924,15 +3105,16 @@ var JSHINT = (function () {
 		funct["(breakage)"] += 1;
 		advance("(");
 		nonadjacent(this, t);
-		nospace();
+		//nospace();
+		nonadjacent();
 		this.condition = expression(20);
 		advance(")", t);
-		nospace(state.tokens.prev, state.tokens.curr);
-		nonadjacent(state.tokens.curr, state.tokens.next);
+		nonadjacent(state.tokens.prev, state.tokens.curr);
+		nonadjacent();
 		t = state.tokens.next;
 		advance("{");
 		nonadjacent(state.tokens.curr, state.tokens.next);
-		indent += state.option.indent;
+		indent += 2*state.option.indent;
 		this.cases = [];
 
 		for (;;) {
@@ -2954,8 +3136,12 @@ var JSHINT = (function () {
 						warning("W086", state.tokens.curr, "case");
 					}
 				}
+				if(state.tokens.curr.id !== "{") {
+					blankline();
+				}
 				indentation(-state.option.indent);
 				advance("case");
+				nonadjacent();
 				this.cases.push(expression(20));
 				increaseComplexityCount();
 				g = true;
@@ -2978,13 +3164,16 @@ var JSHINT = (function () {
 						}
 					}
 				}
+				if(state.tokens.curr.id !== "{") {
+					blankline();
+				}
 				indentation(-state.option.indent);
 				advance("default");
 				g = true;
 				advance(":");
 				break;
 			case "}":
-				indent -= state.option.indent;
+				indent -= 2*state.option.indent;
 				indentation();
 				advance("}", t);
 				funct["(breakage)"] -= 1;
@@ -3059,7 +3248,8 @@ var JSHINT = (function () {
 		increaseComplexityCount();
 		advance("(");
 		nonadjacent(this, t);
-		nospace();
+		//nospace();
+		nonadjacent();
 		if (peek(state.tokens.next.id === "var" ? 1 : 0).id === "in") {
 			if (state.tokens.next.id === "var") {
 				advance("var");
@@ -3078,6 +3268,7 @@ var JSHINT = (function () {
 			}
 			advance("in");
 			expression(20);
+			nonadjacent();
 			advance(")", t);
 			s = block(true, true);
 			if (state.option.forin && s && (s.length > 1 || typeof s[0] !== "object" ||
@@ -3103,13 +3294,16 @@ var JSHINT = (function () {
 				}
 			}
 			nolinebreak(state.tokens.curr);
+			nonadjacent();
 			advance(";");
 			if (state.tokens.next.id !== ";") {
 				expression(20);
 				parseCondAssignment();
 			}
 			nolinebreak(state.tokens.curr);
+			nonadjacent();
 			advance(";");
+			nonadjacent();
 			if (state.tokens.next.id === ";") {
 				error("E021", state.tokens.next, ")", ";");
 			}
@@ -3122,8 +3316,9 @@ var JSHINT = (function () {
 					comma();
 				}
 			}
+			nonadjacent();
 			advance(")", t);
-			nospace(state.tokens.prev, state.tokens.curr);
+			// nospace(state.tokens.prev, state.tokens.curr);
 			block(true, true);
 			funct["(breakage)"] -= 1;
 			funct["(loopage)"] -= 1;
@@ -3339,7 +3534,7 @@ var JSHINT = (function () {
 
 
 	// The actual JSHINT function itself.
-	var itself = function (s, o, g) {
+	var itself = function (s, o, g, internal) {
 		var a, i, k, x;
 		var optionKeys;
 		var newOptionObj = {};
@@ -3496,7 +3691,12 @@ var JSHINT = (function () {
 			emitter.emit("Number", ev);
 		});
 
+		lex.on("Comment", function (ev) {
+			emitter.emit("Comment", ev);
+		});
+
 		lex.start();
+		internal || emitter.emit("start");
 
 		// Check options
 		for (var name in o) {
@@ -3701,9 +3901,11 @@ var JSHINT = (function () {
 			for (i = 0; i < JSHINT.internals.length; i += 1) {
 				k = JSHINT.internals[i];
 				o.scope = k.elem;
-				itself(k.value, o, g);
+				itself(k.value, o, g, true);
 			}
 		}
+
+		internal || emitter.emit("complete");
 
 		return JSHINT.errors.length === 0;
 	};
