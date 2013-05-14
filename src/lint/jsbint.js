@@ -3695,7 +3695,6 @@ var JSHINT = (function () {
 		});
 
 		lex.start();
-		internal || emitter.emit("start");
 
 		// Check options
 		for (var name in o) {
@@ -3713,6 +3712,7 @@ var JSHINT = (function () {
 		comma.first = true;
 
 		try {
+			internal || emitter.emit("start");
 			advance();
 			switch (state.tokens.next.id) {
 			case "{":
@@ -3877,6 +3877,8 @@ var JSHINT = (function () {
 				}
 			}
 
+			internal || emitter.emit("complete");
+
 		} catch (err) {
 			if (err && err.name === "JSHintError") {
 				var nt = state.tokens.next || {};
@@ -3903,8 +3905,6 @@ var JSHINT = (function () {
 				itself(k.value, o, g, true);
 			}
 		}
-
-		internal || emitter.emit("complete");
 
 		return JSHINT.errors.length === 0;
 	};
