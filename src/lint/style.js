@@ -28,7 +28,8 @@ exports.register = function (linter) {
 
 
 	linter.on("Comment", function style_scanComment( data ) {
-		var curr = state.tokens.curr;
+		var curr = state.tokens.curr,
+			match;
 
 		if (!linter.getOption("strictcomment")) {
 			return;
@@ -54,7 +55,8 @@ exports.register = function (linter) {
 				});
 			}
 		} else {
-			data.line -= data.value.match(/\n/g).length;
+			match = data.value.match(/\n/g);
+			match && (data.line -= match.length);
 		}
 		if( data.line - curr.line === 1 ) {
 			linter.warn("W503", {
