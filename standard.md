@@ -26,12 +26,12 @@ a = function() {
 1-3. 所有的循环体和判断体都需要用"{}"括起来。如：
 ```javascript
 //正确
-if( condition ) {
+if ( condition ) {
     doSomething();
 }
 
 //错误
-if( condition ) doSomething();
+if ( condition ) doSomething();
 ```
 
 1-4. 变量声明。同一作用域下的所有变量，全部提至函数顶部，且使用一个var来集中申明。
@@ -47,7 +47,7 @@ function a() {
 
     statement;
 
-    for( ; i < len; i++ ) {
+    for ( ; i < len; i++ ) {
         //do some thing.
     }
 }
@@ -66,11 +66,11 @@ function a() {
 function a() {
     var a = 1;
 
-    for( var i = 0, len = arr.length; i < len ; i++ ) {
+    for ( var i = 0, len = arr.length; i < len; i++ ) {
         //do some thing.
     }
 
-    if( condition ) {
+    if ( condition ) {
        var b = 2;
 
        //do something.
@@ -81,7 +81,7 @@ function a() {
 function a() {
     var a = 1;
 
-    if( condition ) {
+    if ( condition ) {
        var b = 2;
 
        //do something.
@@ -164,15 +164,15 @@ function myFunc() {
         v2 = 2,
         v3 = 3;
 
-    if( v1 == 1 ) {
+    if ( v1 == 1 ) {
         statement
     }
 
-    while( condition ) {
+    while ( condition ) {
         statement
     }
 
-    if( condition ) {
+    if ( condition ) {
         statement
     }
 }
@@ -182,10 +182,10 @@ function myFunc() {
     var v1 = 1,
         v2 = 2,
         v3 = 3;
-    if( v1 == 1 ) {
+    if ( v1 == 1 ) {
         statement
     }
-    while( condition ) {
+    while ( condition ) {
         statement
     }
 
@@ -234,7 +234,7 @@ for (t in selected) { statement }
 1-5-6. switch语句中的断行, 每个case之前有一个缩进，case之后的语句两个缩进, 每个break;后都有一个新行，最后一个除外。
 
 ```javascript
-switch( condition ) {
+switch ( condition ) {
     case 'first':
         doSomething();
         break;
@@ -294,7 +294,7 @@ switch ( v ) {
 }
 
 //当括号当做组合来用时，内部不需要空格
-if( !(obj = true) ) {
+if ( !(obj = true) ) {
     
 }
 ```
@@ -552,7 +552,7 @@ function doSomething() {
         // 这个变量用来存高度
         c;
 
-    if( condition ) {
+    if ( condition ) {
 
         // 如果代码执行到这，则说明通过安全验证。
         popupDialog();
@@ -569,7 +569,7 @@ function doSomething() {
  * 我的注释
  * 注释中的第二段
  */
-if( condition ) {
+if ( condition ) {
     statement
 }
 ```
@@ -695,7 +695,7 @@ a = new Foo();
 ```javascript
 function getPerson() {
 
-    if( condition ) {
+    if ( condition ) {
         return new Persion();
     } else {
         return null;
