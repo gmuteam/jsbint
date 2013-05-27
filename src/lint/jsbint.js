@@ -3294,13 +3294,14 @@ var JSHINT = (function () {
 				}
 			}
 			nolinebreak(state.tokens.curr);
-			nonadjacent();
+			nospace();
 			advance(";");
 			if (state.tokens.next.id !== ";") {
 				expression(20);
 				parseCondAssignment();
 			}
 			nolinebreak(state.tokens.curr);
+			nospace();
 			advance(";");
 			nonadjacent();
 			if (state.tokens.next.id === ";") {
