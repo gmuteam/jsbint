@@ -3292,9 +3292,9 @@ var JSHINT = (function () {
 						comma();
 					}
 				}
+				nospace();
 			}
 			nolinebreak(state.tokens.curr);
-			nospace();
 			advance(";");
 			if (state.tokens.next.id !== ";") {
 				expression(20);

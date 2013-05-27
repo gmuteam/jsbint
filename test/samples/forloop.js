@@ -13,4 +13,8 @@
 
     }
 
+    for ( ; i < len; ) {
+        // bla bla bla
+    }
+
 })();
