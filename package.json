@@ -1,6 +1,6 @@
 {
   "name": "jsbint",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "jslint for baidu gmu.",
   "main": "src/lint/jsbint.js",
   "scripts": {

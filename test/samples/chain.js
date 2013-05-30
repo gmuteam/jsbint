@@ -43,3 +43,41 @@
         .addClass( 'className' )
         .html( 'xxxx' );
 })();
+
+(function() {
+    $.ui.test({}).define( 'button', {
+        a: 3,
+        b: 4,
+
+        // test
+        init: function() {
+
+        },
+
+        destroy: function() {
+
+        }
+    } );
+
+    $.ui.button.register(function() {
+        var a = 0, 
+            b = 2;
+
+        console.log( a, b );
+    });
+
+    $.ui.test({})
+            .define( 'button', {
+                a: 3,
+                b: 4,
+                
+                // test
+                init: function() {
+
+                },
+
+                destroy: function() {
+
+                }
+            } );
+})();

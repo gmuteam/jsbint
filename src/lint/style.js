@@ -28,10 +28,10 @@ exports.register = function (linter) {
 
 
 	linter.on("Comment", function style_scanComment( data ) {
-		var curr = state.tokens.curr,
+		var prev = data.prev,
 			match;
 
-		if (!linter.getOption("strictcomment")) {
+		if (!linter.getOption("strictcomment") || !prev ) {
 			return;
 		}
 		
@@ -45,20 +45,21 @@ exports.register = function (linter) {
 				});
 			}
 
-			if( curr.line === data.line && 
-				data.from !==  curr.character + linter.getOption("indent")) {
+			if( prev.line === data.line && 
+				data.from !==  prev.character + linter.getOption("indent")) {
 
 				linter.warn("W015", {
 					line: data.line,
 					char: data.from,
-					data: [data.value, curr.character + linter.getOption("indent"), data.from ]
+					data: [data.value, prev.character + linter.getOption("indent"), data.from ]
 				});
 			}
 		} else {
 			match = data.value.match(/\n/g);
 			match && (data.line -= match.length);
 		}
-		if( data.line - curr.line === 1 ) {
+		
+		if( prev && prev.value !== 'var' && data.line - prev.line === 1 ) {
 			linter.warn("W503", {
 				line: data.line,
 				char: data.from,
