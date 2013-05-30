@@ -1527,6 +1527,8 @@ Lexer.prototype = {
 				obj.isProperty = isProperty;
 			}
 
+			~["(endline)", "(end)"].indexOf(obj.type) || (state.tokens._latest = obj);
+
 			return obj;
 		}.bind(this);
 
@@ -1624,6 +1626,7 @@ Lexer.prototype = {
 				state.tokens.curr.comment = true;
 
 				this.trigger("Comment", {
+					prev: state.tokens._latest,
 					line: this.line,
 					char: this.char,
 					from: this.from,

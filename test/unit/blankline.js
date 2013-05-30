@@ -6,30 +6,27 @@
         debug = require('../util/helper').debug;
 
 
-    // 测试链式函数断行问题。
-    exports.testChain = function( test ){
-        var result = jsbint('chain.js'),
+    // 测试命名
+    exports.testNaming = function( test ){
+        var result = jsbint('blankline.js'),
             errorPos = [
-                {line:18, character:16},
-                {line:33, character:23},
-                {line:42, character:9},
-                {line:43, character:9},
-                {line:44, character:9}
+                {line:4, character:5},
+                {line:6, character:5},
+                {line:9, character:5}
             ];
 
         // debug(result, true);
-
-        result = result.filter(function( error ) {
-            return ~['W012', 'W015', 'W086', "W014"].indexOf( error.code );
-        });
         
+        result = result.filter(function( error ) {
+            return ~['W503'].indexOf( error.code );
+        });
+
         // debug(result, true);
 
         /*result.forEach(function(error){
             console.log("{line:"+error.line+", character:"+error.character+"},");
         });
         debug(true);*/
-
 
         test.expect(errorPos.length*2+1);
 

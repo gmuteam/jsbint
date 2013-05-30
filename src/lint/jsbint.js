@@ -812,6 +812,14 @@ var JSHINT = (function () {
 			}
 		}
 
+		if( state.tokens.curr._enterChain ) {
+			indent += 2 * state.option.indent;
+		}
+
+		if( state.tokens.curr._leaveChain ) {
+			indent -= 2 * state.option.indent;
+		}
+
 		// 严格的缩进检测
 		// todo 缩进后，进入()里面再换行应该再次加2个缩进
 		if( state.option.strictindent && state.tokens.next.line !== state.tokens.curr.line ) {
@@ -1121,8 +1129,8 @@ var JSHINT = (function () {
 		x.block = true;
 		x.fud = function(){
 
-			// 处理ele if中的if情况，这个时候是不要求换行的
-			if( !state.tokens.prev.reserved ) {
+			// 处理else if中的if情况，这个时候是不要求换行的
+			if( !state.tokens.prev.reserved && state.tokens.prev.value !== '{' ) {
 				blankline(state.tokens.prev, state.tokens.curr);
 			}
 			return typeof f === "function" ? f.call(this): this;
@@ -2155,6 +2163,7 @@ var JSHINT = (function () {
 		var _pre = state.tokens.prev,
 			m = identifier(false, true),
 			i = 0,
+			j = 1,
 			_depth = 0,
 			prev,
 			chainbreak,
@@ -2208,16 +2217,24 @@ var JSHINT = (function () {
 						if( _depth ) {
 							_depth--;
 						} else {
+							
+							j = 1;
+							while ( ~["(endline)", "(end)"].indexOf(peek( i + j ).type)) {
+								j++;
+							}
+							// 结束了
+							// 且之后没有链式了
+							if ( peek( i + j ).id !== '.' ) {
+								chainbreak = false;
+							}
 							break;
 						}
 					} else if( t.id === '(' ) {
 						_depth++;
 					}
 
-					// 根据做括号来判断是否有block
-					if( t.id === '{' ) {
+					if( t.id === '{' && peek(i + 1).line !== t.line ) {
 						chainbreak = true;
-						break;
 					}
 
 					i++;
@@ -2230,6 +2247,10 @@ var JSHINT = (function () {
 				linebreak(_pre, state.tokens.prev, "."+m);
 			}
 
+			if( _pre.line !== state.tokens.prev.line && i > 0 ) {
+				state.tokens.next._enterChain = true;
+				peek( i )._leaveChain = true;
+			}
 		}
 
 		return that;
@@ -2296,7 +2317,12 @@ var JSHINT = (function () {
 			} else {
 				nonadjacent(t1, t2);
 				advance(")");
-				nonadjacent(state.tokens.prev, state.tokens.curr);
+
+				if ( false /*&& p.length > 1 && ~["function", "{"].indexOf( p[p.length -1 ].id )*/ ) {
+					nospace(state.tokens.prev, state.tokens.curr);
+				} else {
+					nonadjacent(state.tokens.prev, state.tokens.curr);
+				}
 			}
 		} else {
 			advance(")");
@@ -2340,7 +2366,7 @@ var JSHINT = (function () {
 		// 检查链式缩进
 		if( state.option.strictindent && state.tokens.next.id === "." && 
 				state.tokens.next.line !== state.tokens.curr.line ) {
-			indentation( 2 * state.option.indent );
+			indentation( 2 *  state.option.indent );
 		}
 
 		that.left = left;
@@ -2641,7 +2667,7 @@ var JSHINT = (function () {
 
 	(function (x) {
 		x.nud = function () {
-			var b, f, i, p, t;
+			var b, f, i, p, t, exp, t1, t2;
 			var props = {}; // All properties, including accessors
 
 			function saveProperty(name, tkn) {
@@ -2746,10 +2772,14 @@ var JSHINT = (function () {
 					if (typeof i !== "string") {
 						break;
 					}
-
+					t1 = state.tokens.prev;
+					t2 = state.tokens.curr;
 					advance(":");
 					nonadjacent(state.tokens.curr, state.tokens.next);
-					expression(10);
+					exp = expression(10);
+					if ( exp && ~["{", "function"].indexOf( exp.value ) && t1.id !== "{" ) {
+						blankline( t1, t2 );
+					}
 				}
 
 				countMember(i);
@@ -2759,6 +2789,8 @@ var JSHINT = (function () {
 						warning("W070", state.tokens.curr);
 					} else if (state.tokens.next.id === "}" && !state.option.es5) {
 						warning("W070", state.tokens.curr);
+					} else if ( exp && ~["{", "function"].indexOf( exp.value ) && state.tokens.next.id !== "}" ) {
+						blankline();
 					}
 				} else {
 					break;
