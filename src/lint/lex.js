@@ -525,7 +525,7 @@ Lexer.prototype = {
 
 					// If we hit EOF and our comment is still unclosed,
 					// trigger an error and end the comment implicitly.
-					if (!this.nextLine()) {
+					if (!this.nextLine(true)) {
 						this.trigger("error", {
 							code: "E017",
 							line: startLine,
@@ -1396,7 +1396,7 @@ Lexer.prototype = {
 	 * switched, this method also checks for mixed spaces and tabs
 	 * and other minor warnings.
 	 */
-	nextLine: function () {
+	nextLine: function ( incomment ) {
 		var char;
 
 		if (this.line >= this.lines.length) {
@@ -1423,7 +1423,7 @@ Lexer.prototype = {
 		// If there is a limit on line length, warn when lines get too
 		// long.
 
-		if (state.option.maxlen && state.option.maxlen < this.input.length) {
+		if (!incomment && state.option.maxlen && state.option.maxlen < this.input.length) {
 			this.trigger("warning", { code: "W101", line: this.line, character: this.input.length });
 		}
 
