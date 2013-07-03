@@ -2310,7 +2310,7 @@ var JSHINT = (function () {
 			}
 
 			// 如果
-			if( p.length === 1 && ~["[", "function", "{"].indexOf( p[0].id )) {
+			if( p.length === 1 && ~["[", "function", "{"].indexOf( p[0].id ) && !p[0].left ) {
 				nospace(t1, t2);
 				advance(")");
 				nospace(state.tokens.prev, state.tokens.curr);

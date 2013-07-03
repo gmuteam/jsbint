@@ -107,3 +107,9 @@
 
     a( ( b, c ), 4 );
 });
+
+(function() {
+    var obj = [ 1, 2, 3 ];
+
+    console.log( obj[ 0 ] );
+})();
