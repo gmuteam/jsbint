@@ -792,7 +792,7 @@ var JSHINT = (function () {
 
 		state.tokens.prev = state.tokens.curr;
 		state.tokens.curr = state.tokens.next;
-		
+
 		for (;;) {
 			state.tokens.next = lookahead.shift() || lex.token();
 			if (!state.tokens.next) { // No more tokens left, give up
@@ -824,7 +824,7 @@ var JSHINT = (function () {
 		// todo 缩进后，进入()里面再换行应该再次加2个缩进
 		if( state.option.strictindent && state.tokens.next.line !== state.tokens.curr.line ) {
 			if( state.tokens.curr.relation || state.tokens.next.relation ||
-				~["&&", "||"].indexOf(state.tokens.curr.id) || 
+				~["&&", "||"].indexOf(state.tokens.curr.id) ||
 				~["&&", "||"].indexOf(state.tokens.next.id)
 			 ) {
 				indentation( 2 * state.option.indent );
@@ -974,7 +974,7 @@ var JSHINT = (function () {
 		if (!state.option.laxbreak && left.line !== right.line) {
 			warning("W014", right, right.id);
 		} else if (state.option.white) {
-			
+
 			if (left.character === right.from) {
 				left.from += (left.character - left.from);
 				warning("W013", left, left.value);
@@ -1307,9 +1307,9 @@ var JSHINT = (function () {
 					while( rightvalue.value === '=' ) {
 						rightvalue = rightvalue.right;
 					}
-					
-					if( isString( state.option.assignthisto ) && 
-							rightvalue.value === 'this' && 
+
+					if( isString( state.option.assignthisto ) &&
+							rightvalue.value === 'this' &&
 							left.value !== state.option.assignthisto ) {
 
 						warning("W505", left, state.option.assignthisto, left.value );
@@ -1671,7 +1671,7 @@ var JSHINT = (function () {
 
 			line = state.tokens.curr.line;
 			if (state.tokens.next.id !== "}") {
-				
+
 				// 必须断行
 				linebreak();
 				indent += state.option.indent;
@@ -2217,7 +2217,7 @@ var JSHINT = (function () {
 						if( _depth ) {
 							_depth--;
 						} else {
-							
+
 							j = 1;
 							while ( ~["(endline)", "(end)"].indexOf(peek( i + j ).type)) {
 								j++;
@@ -2294,14 +2294,14 @@ var JSHINT = (function () {
 					break;
 				}
 
-				if( state.option.operatorend && 
+				if( state.option.operatorend &&
 					state.tokens.next.line !== state.tokens.curr.line ) {
 					warning('W502', state.tokens.curr, state.tokens.next.id);
 				}
 
 				comma();
 
-				if( state.option.strictindent && 
+				if( state.option.strictindent &&
 					state.tokens.next.line !== state.tokens.curr.line ) {
 
 					indentation( 2 * state.option.indent );
@@ -2364,7 +2364,7 @@ var JSHINT = (function () {
 		}
 
 		// 检查链式缩进
-		if( state.option.strictindent && state.tokens.next.id === "." && 
+		if( state.option.strictindent && state.tokens.next.id === "." &&
 				state.tokens.next.line !== state.tokens.curr.line ) {
 			indentation( 2 *  state.option.indent );
 		}
@@ -2483,7 +2483,7 @@ var JSHINT = (function () {
 		} else {
 			nospace();
 		}
-		
+
 		advance("]", this);
 		return this;
 	}, 160);
@@ -2530,14 +2530,14 @@ var JSHINT = (function () {
 			params.push(ident);
 			addlabel(ident, "unused", state.tokens.curr);
 			if (state.tokens.next.id === ",") {
-				if( state.option.operatorend && 
+				if( state.option.operatorend &&
 					state.tokens.next.line !== state.tokens.curr.line ) {
 					warning('W502', state.tokens.curr, state.tokens.next.id);
 				}
 
 				comma();
 
-				if( state.option.strictindent && 
+				if( state.option.strictindent &&
 					state.tokens.next.line !== state.tokens.curr.line ) {
 
 					indentation( 2 * state.option.indent );
@@ -2872,7 +2872,7 @@ var JSHINT = (function () {
 	var varstatement = stmt("var", function (prefix) {
 		// JavaScript does not have block scope. It only has function scope. So,
 		// declaring a variable in a block can have unexpected consequences.
-		var id, name, value;
+		var id, name, value, isAssign;
 
 		if (funct["(onevar)"] && state.option.onevar) {
 			warning("W081");
@@ -2903,7 +2903,10 @@ var JSHINT = (function () {
 			name = state.tokens.curr;
 			this.first.push(state.tokens.curr);
 
-			if (state.tokens.next.id === "=") {
+			isAssign = state.tokens.next.id === "=";
+
+			if ( isAssign ) {
+
 				nonadjacent(state.tokens.curr, state.tokens.next);
 				advance("=");
 				nonadjacent(state.tokens.curr, state.tokens.next);
@@ -2915,27 +2918,28 @@ var JSHINT = (function () {
 				}
 				value = expression(0);
 				name.first = value;
-				
+
 				// 非赋值的变量跑到赋初始值的变量前面了。
 				if( state.option.assignvarfirst && funct["(unassignvar)"] ) {
 					warning("W500");
 				}
 
 			} else if( state.option.assignvarfirst ) {
-				
 				// 说明是非赋值语句
 				funct["(unassignvar)"] = true;
 
 			}
+
 			if (state.tokens.next.id !== ",") {
 				break;
 			}
-			comma();
 
 			// 如果设置了
-			if( state.option.varnewline && state.tokens.prev.line === state.tokens.next.line) {
+			if( isAssign && state.option.varnewline && state.tokens.prev.line === state.tokens.next.line) {
 				warning("W501");
 			}
+
+			comma();
 		}
 		return this;
 	});

@@ -95,16 +95,14 @@
                 {line:4, character:9},
                 {line:7, character:13},
                 {line:10, character:14},
-                {line:10, character:21},
-                {line:26, character:15},
-                {line:33, character:12},
-                {line:33, character:15},
+                {line:10, character:19},
+                {line:26, character:15}
             ];
 
         result = result.filter(function( error ) {
             return ~['W081', 'W500', 'W501'].indexOf( error.code );
         });
-        test.expect(17);
+        test.expect(13);
 
         test.equal(result.length, errorPos.length, 'ok');
 
@@ -129,7 +127,7 @@
             ];
 
         // debug(result, true);
-        
+
         result = result.filter(function( error ) {
             return ~['W043'].indexOf( error.code );
         });
