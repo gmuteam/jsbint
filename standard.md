@@ -1,4 +1,7 @@
-# GMU 代码规范
+# 代码规范
+
+此规范的主要目的是统一组内代码风格，减少组内维护代码成本。此文档大量参考了[idiomatic.js](https://github.com/rwaldron/idiomatic.js),
+有觉得不合理的地方，欢迎在[issues](https://github.com/gmuteam/jsbint/issues)里面提问题。
 
 ## 内容导航
  * [基本的格式化](#1-)
@@ -17,27 +20,27 @@
 ```javascript
 var a;
 
-//错误, 结尾缺少分号
+// 错误, 结尾缺少分号
 a = function() {
-    //do some thing.
+    // do some thing.
 }
 ```
 
 1-3. 所有的循环体和判断体都需要用"{}"括起来。如：
 ```javascript
-//正确
+// 正确
 if ( condition ) {
     doSomething();
 }
 
-//错误
+// 错误
 if ( condition ) doSomething();
 ```
 
 1-4. 变量声明。同一作用域下的所有变量，全部提至函数顶部，且使用一个var来集中申明。
 
 ```javascript
-//正确
+// 正确
 function a() {
     var v1 = 1,
         v2 = 2,
@@ -48,11 +51,11 @@ function a() {
     statement;
 
     for ( ; i < len; i++ ) {
-        //do some thing.
+        // do some thing.
     }
 }
 
-//错误
+// 错误
 function a() {
 
     var v1 = 1;
@@ -62,42 +65,41 @@ function a() {
     statement;
 }
 
-//错误
+// 错误
 function a() {
     var a = 1;
 
     for ( var i = 0, len = arr.length; i < len; i++ ) {
-        //do some thing.
+        // do some thing.
     }
 
     if ( condition ) {
        var b = 2;
 
-       //do something.
+       // do something.
     }
 }
 
-//错误
+// 错误
 function a() {
     var a = 1;
 
     if ( condition ) {
        var b = 2;
 
-       //do something.
+       // do something.
     }
 }
 ```
 
-同时每个变量独占一行，第二个起应当在var所需缩进的基础上多一个缩进。需要赋值初始值的优先放在前面，如：
+同时每个带赋值的变量应当独占一行，第二个起应当在var所需缩进的基础上多一个缩进。需要赋值初始值的优先放在前面，如：
 
 ```javascript
 function a() {
     var first = 1,
         second = 2,
         third = 3,
-        fourth,
-        fifth;
+        fourth, fifth;
 
     doSomething();
 }
@@ -184,11 +186,11 @@ var a = {
     },
 
     b: function() {
-        
+
     }
 }
 
-//错误
+// 错误
 function myFunc() {
     var v1 = 1,
         v2 = 2,
@@ -211,7 +213,7 @@ if ( a === 1 ) {
     statement
 }
 
-//错误
+// 错误
 if ( a === 1 ) {
     statement
 }
@@ -222,7 +224,7 @@ else if ( a === 2 ) {
 
 1-5-5. 包含代码块的"{}"，应该在"{"后立即换行。
 ```javascript
-//正确
+// 正确
 for ( t in selected ) {
     statement1
     statement2
@@ -233,11 +235,11 @@ for ( t in selected ) {
 }
 
 
-//错误
+// 错误
 for (t in selected)
 {
-    //statement1
-    //statement2
+    // statement1
+    // statement2
 }
 for (t in selected) { statement }
 ```
@@ -266,7 +268,7 @@ switch ( condition ) {
 
 1-5-7. 超长字符串应该使用"+"进行换行。
 ```javascript
-//正确
+// 正确
 var myString = 'A rather long string of English text, an error message ' +
              'actually that just keeps going and going -- an error ' +
              'message to make the Energizer bunny blush (right through ' +
@@ -274,7 +276,7 @@ var myString = 'A rather long string of English text, an error message ' +
              'you\'ve got an error and all the extraneous whitespace is ' +
              'just gravy.  Have a nice day.';
 
-//错误
+// 错误
 var myString = 'A rather long string of English text, an error message \
               actually that just keeps going and going -- an error \
               message to make the Energizer bunny blush (right through \
@@ -304,25 +306,25 @@ switch ( v ) {
     case '':...
 }
 
-//当括号当做组合来用时，内部不需要空格
+// 当括号当做组合来用时，内部不需要空格
 if ( !(obj = true) ) {
-    
+
 }
 ```
 
 1-6-2. 方法定义和方法调用左括号“(”前面不需要空格, 右括号与{之间始终有一个空格，括号内部开头和结尾应当各有一空格。
 ```javascript
-//函数定义
+// 函数定义
 function myFunc( arg ) {
     statement
 }
 
-//匿名函数
+// 匿名函数
 function( arg ) {
     statement
 }
 
-//函数调用
+// 函数调用
 myFunc( arg );
 
 ```
@@ -330,10 +332,10 @@ myFunc( arg );
 **方法调用时，有几种例外，函数调用时有些场景不需要要空格**
 
 ```javascript
-//1. 函数调用中无参数
+// 1. 函数调用中无参数
 callFunc();
 
-//2. 参数是obj，array，function直接量时
+// 2. 参数是obj，array，function直接量时
 callFunc([ a, b, c ]);
 
 callFunc({
@@ -360,14 +362,14 @@ for ( t in selected ) {
  }
 
 function MyClass( selector ){
-    //.....
+    // .....
 }
 
 new MyClass( '#abc' );
 
 var arr = [ 1, 2, 3, 4 ];
 
-//错误
+// 错误
 for (t in selected) {
     if (!hash[t]&&isOk){
         deselect(t)
@@ -375,7 +377,7 @@ for (t in selected) {
 }
 
 function MyClass(selector){
-    //.....
+    // .....
 }
 
 new MyClass('#abc');
@@ -436,13 +438,13 @@ function isGroupId( id ) {
 
 2-7. 简写单词在变量名中出现时也应该遵循驼峰式写法。
 ```javascript
-//正确
+// 正确
 function getXml () {}
 function getId () {}
 function getHtml () {}
 var xmlDocument;
 
-//错误
+// 错误
 function getXML(){}
 function getID(){}
 function getHTML(){}
@@ -453,13 +455,13 @@ var XMLDocument;
 ```javascript
 var me = this;
 setTimeout( function() {
-    //me.
+    // ...
 }, 1000 );
 
-//错误
+// 错误
 var ins = this;
 setTimeout( function() {
-    //ins.
+    // ins.
 }, 1000 );
 ```
 
@@ -475,7 +477,7 @@ setTimeout( function() {
         <td>e</td>
         <td>Event对象</td>
         <td><pre><code>$( '#a' ).click( function( e ){
-    //...
+    // ...
 });
 </code></pre></td>
     </tr>
@@ -488,7 +490,7 @@ setTimeout( function() {
         <td>ex</td>
         <td>Exception</td>
         <td><pre><code>try{
-    //statement
+    // statement
 }
 catch( ex ){
     console.log( ex );
@@ -513,21 +515,21 @@ var $div = $('<div></div>');
 
 2-11. 变量命名前缀应当是名词，与函数区分开来，函数应当是动词
 ```javascript
-//好的写法
+// 好的写法
 var count = 10,
     myName = 'Abcd',
     found = true;
 
-//不好的写法
+// 不好的写法
 var getCount = 10,
     isFound = true;
 
-//好的写法
+// 好的写法
 function getName() {
     return myName;
 }
 
-//不好的写法
+// 不好的写法
 function theName(){
     return myName;
 }
@@ -598,7 +600,7 @@ var count = 10;
 4-1.  for-in循环体中必须用hasOwnProperty方法检查成员是否为自身成员。避免来自原型链上的污染。
 
 ```javascript
-//正确
+// 正确
 for ( name in object ) {
 
     if ( object.hasOwnProperty( name ) ) {
@@ -622,19 +624,19 @@ if ( isValid === true ) {
 
 4-6. 使用parseInt将字符串转换成整数时必须使用基数参数。
 ```javascript
-//10进制
+// 10进制
 parseInt( str, 10 );
 
-//2进制
+// 2进制
 parseInt( str, 2 );
 
-//8进制
+// 8进制
 parseInt( str, 8 );
 
-//16进制
+// 16进制
 parseInt( str, 16 );
 
-//错误
+// 错误
 parseInt( str );
 ```
 另外`parseInt( str, 10)`可以考虑是用`~~str`或者`str>>0`来达到同样的效果
@@ -642,7 +644,7 @@ parseInt( str );
 4-7. 函数定义。不要在if、for的代码块中定义函数，在函数中定义内嵌函数时应该把函数定义放在顶部。闭包除外。
 
 ```javascript
-//正确
+// 正确
 function outerFunc( va ){
     va = va || 0;
 
@@ -655,7 +657,7 @@ function outerFunc( va ){
     }
 }
 
-//错误
+// 错误
 function outerFunc( va ){
     va = va || 0;
 
@@ -672,22 +674,22 @@ function outerFunc( va ){
 4-8. 立即调用的函数用括号括起来.
 
 ```javascript
-//正确
+// 正确
 (function(){
     doSomething();
 })();
 
-//错误
+// 错误
 void function(){
     doSomething();
 }();
 
-//错误
+// 错误
 (function(){
     doSomething();
 }());
 
-//错误
+// 错误
 function(){
     doSomething();
 }();
@@ -697,7 +699,7 @@ function(){
 ```javascript
 var a = null;
 
-//later
+// later
 a = new Foo();
 
 ```
@@ -718,7 +720,7 @@ function getPerson() {
 ```javascript
 var myString = '< a href="http://www.baidu.com">Let\'sGo</a>';
 
-//错误
+// 错误
 var myString = "< a href='http://www.baidu.com'>Let'sGo</a>"';
 ```
 
@@ -728,7 +730,7 @@ function MyClass( opts ){
     statement
 }
 
-//错误
+// 错误
 var MyClass = function( opts ){
     statement
 }
@@ -750,7 +752,7 @@ addListener( elem, "click", function() {
     myApp.handler( e );
 });
 
-//错误
+// 错误
 var myApp = {
     handler: function( e ) {
         this.showPopup( e );
