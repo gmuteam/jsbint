@@ -28,13 +28,6 @@
     console.log(a, b, c);
 })();
 
-//以下是错误的，每个变量应该独占一行
-(function() {
-    var a, b, c;
-
-    console.log(a, b, c);
-})();
-
 //todo var必须在顶部
 (function( undefined ){
     if( undefined ) {
