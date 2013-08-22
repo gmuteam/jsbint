@@ -2934,12 +2934,12 @@ var JSHINT = (function () {
 				break;
 			}
 
+			comma();
+
 			// 如果设置了
 			if( isAssign && state.option.varnewline && state.tokens.prev.line === state.tokens.next.line) {
 				warning("W501");
 			}
-
-			comma();
 		}
 		return this;
 	});
