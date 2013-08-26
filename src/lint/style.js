@@ -34,7 +34,7 @@ exports.register = function (linter) {
 		if (!linter.getOption("strictcomment") || !prev ) {
 			return;
 		}
-		
+
 		// 单行注释
 		if( !data.isMultiline ) {
 			if( data.body.substr(0, 1) !== ' ' ) {
@@ -45,7 +45,7 @@ exports.register = function (linter) {
 				});
 			}
 
-			if( prev.line === data.line && 
+			if( prev.line === data.line &&
 				data.from !==  prev.character + linter.getOption("indent")) {
 
 				linter.warn("W015", {
@@ -58,8 +58,8 @@ exports.register = function (linter) {
 			match = data.value.match(/\n/g);
 			match && (data.line -= match.length);
 		}
-		
-		if( prev && prev.value !== 'var' && data.line - prev.line === 1 ) {
+
+		if( prev && ~['var', '{'].indexOf( prev.value ) && data.line - prev.line === 1 ) {
 			linter.warn("W503", {
 				line: data.line,
 				char: data.from,
