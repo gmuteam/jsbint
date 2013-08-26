@@ -29,7 +29,7 @@ exports.register = function (linter) {
 
 	linter.on("Comment", function style_scanComment( data ) {
 		var prev = data.prev,
-			match;
+			next, match, from;
 
 		if (!linter.getOption("strictcomment") || !prev ) {
 			return;
@@ -59,12 +59,25 @@ exports.register = function (linter) {
 			match && (data.line -= match.length);
 		}
 
-		if( prev && ~['var', '{'].indexOf( prev.value ) && data.line - prev.line === 1 ) {
-			linter.warn("W503", {
-				line: data.line,
-				char: data.from,
-				data: [data.value.split(/\n/)[0]]
-			});
+		if( prev && prev.value !== 'var' ) {
+
+			return;
+
+			// todo
+			next = linter.getNextToken();
+			from = data.from;
+
+			if ( data.isMultiline ) {
+				from = data.char - data.value.split( /$/m )[ 0 ].length;
+			}
+
+			if ( next.from === from && next.line - data.line === 1 && data.line - prev.line === 1 ) {
+				linter.warn("W503", {
+					line: data.line,
+					char: data.from,
+					data: [data.value.split(/\n/)[0]]
+				});
+			}
 		}
 	});
 	// Check for properties named __proto__. This special property was

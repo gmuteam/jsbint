@@ -3671,6 +3671,14 @@ var JSHINT = (function () {
 				return state.jsonMode;
 			},
 
+			getNextToken: function() {
+				var next;
+				while ( (next = peek( lookahead.length )).type === '(endline)' ) {
+					// empty
+				}
+				return next;
+			},
+
 			getOption: function (name) {
 				return state.option[name] || null;
 			},
