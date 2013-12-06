@@ -60,10 +60,11 @@ exports.register = function (linter) {
 		}
 
 		if( prev && prev.value !== 'var' ) {
-
 			return;
 
 			// todo
+			// commant之前应该有个空格，包括单行注释合多行注释。
+			// 由于comment不是token, 这里判断不准，所以先忽略。
 			next = linter.getNextToken();
 			from = data.from;
 

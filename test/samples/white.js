@@ -113,3 +113,24 @@
 
     console.log( obj[ 0 ] );
 })();
+
+// 以下都是正确的
+(function() {
+
+    console.log('hello world');
+
+    // 方法结束与右括号之间没有空格
+    console.log( 'abcdefg', function() {
+
+    });
+
+    console.log( 'abcdefg', {
+        a: 3
+    });
+
+    console.log(function() {
+
+    }, 2 );
+
+
+})();

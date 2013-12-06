@@ -2309,16 +2309,21 @@ var JSHINT = (function () {
 				//
 			}
 
-			// 如果
-			if( p.length === 1 && ~["[", "function", "{"].indexOf( p[0].id ) && !p[0].left ) {
+			if ( p.length === 1 && p[ 0 ].type === '(string)' ) {
 				nospace(t1, t2);
 				advance(")");
 				nospace(state.tokens.prev, state.tokens.curr);
 			} else {
-				nonadjacent(t1, t2);
+				if ( ~["[", "function", "{"].indexOf( p[ 0 ].id ) && !p[ 0 ].left ) {
+					nospace(t1, t2);
+				} else {
+					nonadjacent(t1, t2);
+				}
+
 				advance(")");
 
-				if ( false /*&& p.length > 1 && ~["function", "{"].indexOf( p[p.length -1 ].id )*/ ) {
+
+				if ( ~["[", "function", "{"].indexOf( p[ p.length - 1 ].id ) && !p[ p.length - 1 ].left ) {
 					nospace(state.tokens.prev, state.tokens.curr);
 				} else {
 					nonadjacent(state.tokens.prev, state.tokens.curr);
