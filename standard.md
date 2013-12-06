@@ -113,19 +113,19 @@ function a() {
 
 ```javascript
 // 函数链式调用
-var $item = $( '<div></div>' ).attr( 'id', 'test' )
+var $item = $('<div></div>').attr( 'id', 'test' )
         .attr( 'id', 'what ever' )
         .addClass( 'className' )
         .html( 'xxxx' );
 
 // 非赋值语句
-$( '<div></div>' ).attr( 'id', 'test' )
+$('<div></div>').attr( 'id', 'test' )
         .attr( 'id', 'what ever' )
-        .addClass( 'className' )
+        .addClass('className')
         .html( 'xxxx' );
 
 // 如果某个方法的参数中带有匿名方法，则这个方法的调用之前应当换行。
-var $item = $( '<div></div>' )
+var $item = $('<div></div>')
         .attr( 'id', function() {
             doSomething();
         } )
@@ -133,12 +133,12 @@ var $item = $( '<div></div>' )
         .html( 'xxxx' );
 
 // 错误的示例
-$( '<div></div>' ).attr( 'id', function() {
+$('<div></div>').attr( 'id', function() {
             doSomething();
         } )
         .attr( 'id', 'what ever' )
-        .addClass( 'className' )
-        .html( 'xxxx' );
+        .addClass('className')
+        .html('xxxx');
 ```
 
 1-5-2. 方法参数过长，if语句中条件过多时也需要换行，这种情况下的缩进为2个。同是操作符应当保留在右边结尾处。
@@ -343,6 +343,11 @@ callFunc({
     b: 2
 });
 
+// 3. 参数是单独一个字符串时
+// 函数接受 `string` 字面量作为参数，没有空格
+callFunc('foo');
+
+// 4. 参数是一个立即只是函数时。
 callFunc(function() {
     doSomething();
 });
@@ -365,7 +370,7 @@ function MyClass( selector ){
     // .....
 }
 
-new MyClass( '#abc' );
+new MyClass('#abc');
 
 var arr = [ 1, 2, 3, 4 ];
 
@@ -379,8 +384,6 @@ for (t in selected) {
 function MyClass(selector){
     // .....
 }
-
-new MyClass('#abc');
 
 var arr = [1,2,3,4];
 ```
@@ -748,7 +751,7 @@ var myApp = {
     }
 }
 
-addListener( elem, "click", function() {
+addListener( elem, 'click', function() {
     myApp.handler( e );
 });
 

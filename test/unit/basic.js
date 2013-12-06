@@ -95,9 +95,10 @@
                 {line:4, character:9},
                 {line:7, character:13},
                 {line:10, character:14},
-                {line:10, character:19},
+                {line:10, character:21},
                 {line:26, character:15}
             ];
+        // debug(result, true);
 
         result = result.filter(function( error ) {
             return ~['W081', 'W500', 'W501'].indexOf( error.code );

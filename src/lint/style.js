@@ -29,12 +29,12 @@ exports.register = function (linter) {
 
 	linter.on("Comment", function style_scanComment( data ) {
 		var prev = data.prev,
-			match;
+			next, match, from;
 
 		if (!linter.getOption("strictcomment") || !prev ) {
 			return;
 		}
-		
+
 		// 单行注释
 		if( !data.isMultiline ) {
 			if( data.body.substr(0, 1) !== ' ' ) {
@@ -45,7 +45,7 @@ exports.register = function (linter) {
 				});
 			}
 
-			if( prev.line === data.line && 
+			if( prev.line === data.line &&
 				data.from !==  prev.character + linter.getOption("indent")) {
 
 				linter.warn("W015", {
@@ -58,13 +58,27 @@ exports.register = function (linter) {
 			match = data.value.match(/\n/g);
 			match && (data.line -= match.length);
 		}
-		
-		if( prev && prev.value !== 'var' && data.line - prev.line === 1 ) {
-			linter.warn("W503", {
-				line: data.line,
-				char: data.from,
-				data: [data.value.split(/\n/)[0]]
-			});
+
+		if( prev && prev.value !== 'var' ) {
+			return;
+
+			// todo
+			// commant之前应该有个空格，包括单行注释合多行注释。
+			// 由于comment不是token, 这里判断不准，所以先忽略。
+			next = linter.getNextToken();
+			from = data.from;
+
+			if ( data.isMultiline ) {
+				from = data.char - data.value.split( /$/m )[ 0 ].length;
+			}
+
+			if ( next.from === from && next.line - data.line === 1 && data.line - prev.line === 1 ) {
+				linter.warn("W503", {
+					line: data.line,
+					char: data.from,
+					data: [data.value.split(/\n/)[0]]
+				});
+			}
 		}
 	});
 	// Check for properties named __proto__. This special property was
